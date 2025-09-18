@@ -1,0 +1,39 @@
+# .gitignore for Visual Studio, .NET, and WPF projects
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+.vs/
+
+# NuGet packages
+*.nupkg
+# NuGet restore
+project.lock.json
+project.nuget.cache
+*.nuget.props
+*.nuget.targets
+
+# Windows image file caches
+Thumbs.db
+
+# Others
+*.log
+*.DS_Store
+
+# Auto-generated files
+*.g.cs
+*.g.i.cs
+*.designer.cs
+*.GeneratedMSBuildEditorConfig.editorconfig
+
+# Debug/Release folders
+Debug/
+Release/
