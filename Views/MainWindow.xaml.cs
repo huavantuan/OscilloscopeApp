@@ -38,10 +38,10 @@ namespace OscilloscopeApp.Views
                 _streamers[i].LegendText = $"Kênh {i + 1}";
                 _streamers[i].ManageAxisLimits = false;
                 _streamers[i].LineWidth = 1;
-                _streamers[i].Color = ScottPlot.Color.FromIndex(i);
+                _streamers[i].Color = ScottPlot.Color.FromHex("#c5047bff");
             }
 
-            Plot.Plot.Legend(true);
+            // Plot.Plot.LegendShowItemsFromHiddenPlottables();
             Plot.Plot.Axes.SetLimitsY(-32768, 32767); // nếu dùng Int16 gốc
             Plot.Refresh();
         }
@@ -59,7 +59,7 @@ namespace OscilloscopeApp.Views
                     _streamers[i].Add(value);
             }
 
-            Plot.Refresh(lowQuality: true); // tăng FPS
+            Plot.Refresh(); 
         }
     }
 }
