@@ -1,25 +1,65 @@
-﻿using System.Text;
+﻿using ScottPlot.Plottables;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;;
+using OscilloscopeApp.ViewModels;
 
-namespace OscilloscopeApp;
-
-/// <summary>
-/// Interaction logic for MainWindow.xaml
-/// </summary>
-public partial class MainWindow : Window
+namespace OscilloscopeApp.Views
 {
-    public MainWindow()
+    public partial class MainWindow : Window
     {
-        InitializeComponent();
-        var vm = (MainViewModel)DataContext;
-        vm.Oscilloscope.InitializePlot(PlotControl);
+        private readonly MainViewModel _vm;
+        private readonly DataStreamer[] _streamers = new DataStreamer[8];
+
+        public MainWindow()
+        {
+            InitializeComponent();
+
+            // Khởi tạo ViewModel và gán DataContext
+            _vm = new MainViewModel(new MockSerialPortService());
+            DataContext = _vm;
+
+            // Khởi tạo đồ thị ScottPlot
+            InitPlot();
+
+            // Lắng nghe yêu cầu vẽ lại từ ViewModel
+            _vm.OnRequestRender += () =>
+            {
+                Dispatcher.Invoke(RenderPlot);
+            };
+        }
+
+        private void InitPlot()
+        {
+            Plot.Plot.Clear();
+
+            for (int i = 0; i < 8; i++)
+            {
+                // Tạo DataStreamer cho mỗi kênh
+                _streamers[i] = Plot.Plot.Add.DataStreamer(20000);
+                _streamers[i].LegendText = $"Kênh {i + 1}";
+                _streamers[i].ManageAxisLimits = false;
+                _streamers[i].LineWidth = 1;
+                _streamers[i].Color = ScottPlot.Color.FromIndex(i);
+            }
+
+            Plot.Plot.Legend(true);
+            Plot.Plot.Axes.SetLimitsY(-32768, 32767); // nếu dùng Int16 gốc
+            Plot.Refresh();
+        }
+
+        private void RenderPlot()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                _streamers[i].Clear();
+
+                // Lấy dữ liệu đã scale từ ViewModel
+                var data = _vm.Osc.DisplayData[i];
+
+                foreach (var value in data)
+                    _streamers[i].Add(value);
+            }
+
+            Plot.Refresh(lowQuality: true); // tăng FPS
+        }
     }
 }

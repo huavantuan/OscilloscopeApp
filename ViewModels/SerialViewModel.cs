@@ -1,3 +1,7 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
+
 public partial class SerialViewModel : ObservableObject
 {
     private readonly ISerialPortService serial;

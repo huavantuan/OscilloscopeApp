@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 public partial class ScrollViewModel : ObservableObject
 {
     [ObservableProperty] private long currentOffset;

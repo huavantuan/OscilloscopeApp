@@ -1,3 +1,10 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
+using System.Timers;
+
+namespace OscilloscopeApp.ViewModels;
+
 public partial class MainViewModel : ObservableObject
 {
     public SerialViewModel Serial { get; }

@@ -1,3 +1,5 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+
 public partial class OscilloscopeViewModel : ObservableObject
 {
     private const int Channels = 8;
