@@ -1,17 +1,26 @@
-public class SerialViewModel : ObservableObject
+public partial class SerialViewModel : ObservableObject
 {
-    public ObservableCollection<string> AvailablePorts { get; } = new(SerialPort.GetPortNames());
-    public string SelectedPort { get; set; } = "COM1";
-    public string BaudRate { get; set; } = "9600";
+    private readonly ISerialPortService serial;
+    public ObservableCollection<string> AvailablePorts { get; } = new();
+    [ObservableProperty] private string selectedPort;
+    [ObservableProperty] private string baudRate = "115200";
+    public string ConnectButtonText => serial.IsOpen ? "Disconnect" : "Connect";
 
-    private bool isConnected = false;
-    public string ConnectButtonText => isConnected ? "Disconnect" : "Connect";
+    public SerialViewModel(ISerialPortService serial)
+    {
+        this.serial = serial;
+        foreach (var port in serial.GetPortNames())
+            AvailablePorts.Add(port);
+    }
 
     [RelayCommand]
     private void ToggleConnection()
     {
-        isConnected = !isConnected;
+        if (!serial.IsOpen)
+            serial.Open(SelectedPort, int.TryParse(BaudRate, out var br) ? br : 115200);
+        else
+            serial.Close();
+
         OnPropertyChanged(nameof(ConnectButtonText));
-        // TODO: Gọi thư viện giao tiếp sau
     }
 }

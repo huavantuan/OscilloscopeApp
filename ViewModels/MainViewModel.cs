@@ -1,26 +1,43 @@
 public partial class MainViewModel : ObservableObject
 {
-    public SerialViewModel Serial { get; } = new();
-    public OscilloscopeViewModel Oscilloscope { get; } = new();
+    public SerialViewModel Serial { get; }
+    public OscilloscopeViewModel Osc { get; } = new();
     public ScrollViewModel Scroll { get; } = new();
 
-    public MainViewModel()
-    {
-        Scroll.OnOffsetChanged = offset =>
-        {
-            var data = LoadData(offset); // TODO: lấy dữ liệu từ file/bộ nhớ
-            Oscilloscope.UpdateData(data);
-        };
-    }
+    private readonly ISerialPortService serial;
+    private readonly System.Timers.Timer renderTimer = new(33);
+    private volatile bool pendingUpdate;
 
-    private double[][] LoadData(int offset)
+    public event Action OnRequestRender;
+
+    public MainViewModel(ISerialPortService serial)
     {
-        // Tạo dữ liệu giả để test
-        var result = new double[8][];
-        for (int i = 0; i < 8; i++)
+        this.serial = serial;
+        Serial = new SerialViewModel(serial);
+
+        serial.DataReceived += (s, bytes) =>
         {
-            result[i] = Enumerable.Range(0, 20000).Select(x => Math.Sin(2 * Math.PI * x / 1000.0 + i)).ToArray();
-        }
-        return result;
+            var span = MemoryMarshal.Cast<byte, short>(bytes.AsSpan());
+            Osc.AppendFrame(span);
+            pendingUpdate = true;
+        };
+
+        Scroll.OffsetChanged += offset =>
+        {
+            Osc.ReadWindow(offset);
+            pendingUpdate = true;
+        };
+
+        renderTimer.Elapsed += (s, e) =>
+        {
+            if (pendingUpdate)
+            {
+                pendingUpdate = false;
+                Scroll.SetMax(Osc.MaxOffset);
+                Osc.ReadWindow(Scroll.CurrentOffset);
+                OnRequestRender?.Invoke();
+            }
+        };
+        renderTimer.Start();
     }
 }

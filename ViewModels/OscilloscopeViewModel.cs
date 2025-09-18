@@ -1,24 +1,45 @@
-public class OscilloscopeViewModel : ObservableObject
+public partial class OscilloscopeViewModel : ObservableObject
 {
-    public List<SignalPlot> ChannelPlots { get; } = new();
+    private const int Channels = 8;
+    private const int WindowSize = 20000;
+    private readonly RingBuffer[] buffers = new RingBuffer[Channels];
+    public double[][] DisplayData { get; } = new double[Channels][];
+    private readonly short[] tempShort = new short[WindowSize];
 
-    public void InitializePlot(WpfPlot plot)
-    {
-        plot.Plot.Clear();
-        for (int i = 0; i < 8; i++)
-        {
-            var signal = plot.Plot.AddSignal(new double[20000]);
-            signal.Label = $"Kênh {i + 1}";
-            ChannelPlots.Add(signal);
-        }
-        plot.Refresh();
-    }
+    public double[] ScaleFactors { get; } = Enumerable.Repeat(1.0, Channels).ToArray();
+    public double[] Offsets { get; } = Enumerable.Repeat(0.0, Channels).ToArray();
 
-    public void UpdateData(double[][] channelData)
+    public OscilloscopeViewModel()
     {
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < Channels; i++)
         {
-            ChannelPlots[i].Update(channelData[i]);
+            buffers[i] = new RingBuffer(10_000_000);
+            DisplayData[i] = new double[WindowSize];
         }
     }
+
+    public void AppendFrame(ReadOnlySpan<short> interleaved)
+    {
+        int samplesPerChannel = interleaved.Length / Channels;
+        for (int ch = 0; ch < Channels; ch++)
+        {
+            Span<short> temp = tempShort.AsSpan(0, samplesPerChannel);
+            for (int i = 0; i < samplesPerChannel; i++)
+                temp[i] = interleaved[i * Channels + ch];
+            buffers[ch].Append(temp);
+        }
+    }
+
+    public void ReadWindow(long offset)
+    {
+        for (int ch = 0; ch < Channels; ch++)
+        {
+            Span<short> raw = tempShort.AsSpan();
+            buffers[ch].ReadWindow(offset, raw);
+            for (int i = 0; i < raw.Length; i++)
+                DisplayData[ch][i] = raw[i] * ScaleFactors[ch] + Offsets[ch];
+        }
+    }
+
+    public long MaxOffset => Math.Max(0, buffers[0].Count - WindowSize);
 }

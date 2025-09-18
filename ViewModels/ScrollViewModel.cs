@@ -1,16 +1,15 @@
-public class ScrollViewModel : ObservableObject
+public partial class ScrollViewModel : ObservableObject
 {
-    public int MaxOffset => 10000000 - 20000;
-    private int currentOffset;
-    public int CurrentOffset
+    [ObservableProperty] private long currentOffset;
+    public long MaxOffset { get; private set; }
+    public event Action<long> OffsetChanged;
+
+    public void SetMax(long max)
     {
-        get => currentOffset;
-        set
-        {
-            SetProperty(ref currentOffset, value);
-            OnOffsetChanged?.Invoke(currentOffset);
-        }
+        MaxOffset = Math.Max(0, max);
+        OnPropertyChanged(nameof(MaxOffset));
+        if (CurrentOffset > MaxOffset) CurrentOffset = MaxOffset;
     }
 
-    public Action<int> OnOffsetChanged { get; set; }
+    partial void OnCurrentOffsetChanged(long value) => OffsetChanged?.Invoke(value);
 }
