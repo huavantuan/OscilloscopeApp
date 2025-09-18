@@ -9,8 +9,8 @@
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10">
             <ComboBox Width="120" Margin="0,0,8,0" ItemsSource="{Binding Serial.AvailablePorts}" SelectedItem="{Binding Serial.SelectedPort}" />
             <TextBox Width="100" Margin="0,0,8,0" Text="{Binding Serial.BaudRate}" />
-            <Button Width="110" Content="..." />
-            <ScottPlot:WpfPlot x:Name="Plot" />
+            <Button x:Name="ConnectButton" Width="110" Content="Connect" Click="ConnectButton_Click" />
         </StackPanel>
+        <ScottPlot:WpfPlot x:Name="Plot" />
     </DockPanel>
 </Window>
