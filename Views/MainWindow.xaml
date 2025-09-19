@@ -9,7 +9,14 @@
         <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10">
             <ComboBox Width="120" Margin="0,0,8,0" ItemsSource="{Binding Serial.AvailablePorts}" SelectedItem="{Binding Serial.SelectedPort}" />
             <TextBox Width="100" Margin="0,0,8,0" Text="{Binding Serial.BaudRate}" />
-            <Button x:Name="ConnectButton" Width="110" Content="Connect" Click="ConnectButton_Click" />
+            <Button Width="110"
+                    Content="{Binding Serial.ConnectButtonText}"
+                    Background="{Binding Serial.ConnectButtonColor}"
+                    Command="{Binding Serial.ConnectButtonCommand}" />
+            <Button Width="120" 
+                    Content="Vẽ mô phỏng" 
+                    Command="{Binding SimulateCommand}" 
+                    Margin="8,0,0,0"/>
         </StackPanel>
         <ScottPlot:WpfPlot x:Name="Plot" />
     </DockPanel>

@@ -51,33 +51,15 @@ public partial class MainWindow : Window
         for (int i = 0; i < 8; i++)
         {
             _streamers[i].Clear();
-
-            // Lấy dữ liệu đã scale từ ViewModel
-            var data = _vm.Osc.DisplayData[i];
-
-            foreach (var value in data)
+            foreach (var value in _vm.Osc.DisplayData[i])
                 _streamers[i].Add(value);
         }
-
+        Console.WriteLine("RenderPlot called");
+        long offset = _vm.Scroll.CurrentOffset;
+        Plot.Plot.Axes.SetLimitsX(offset, offset + 20000);
         Plot.Refresh();
     }
-    private void ConnectButton_Click(object sender, RoutedEventArgs e)
-    {
-        var button = sender as System.Windows.Controls.Button;
-        if (button != null)
-        {
-            if (button.Content.ToString() == "Connect")
-            {
-                button.Content = "Disconnect";
-                button.Background = System.Windows.Media.Brushes.Red;
-            }
-            else
-            {
-                button.Content = "Connect";
-                button.Background = System.Windows.Media.Brushes.Green;
-            }
-        }
-    }
+   
 }
 
 
