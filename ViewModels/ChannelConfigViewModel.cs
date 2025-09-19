@@ -2,7 +2,9 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.Input;
 using System.Windows.Forms;
+using OscilloscopeApp.OscilloscopeViewModels;
 
+namespace OscilloscopeApp.ViewModels;
 
 public partial class ChannelConfigViewModel : ObservableObject
 {
@@ -19,30 +21,52 @@ public partial class ChannelConfigViewModel : ObservableObject
 
     public ScottPlot.Color Color { get; set; }
 
-    public double Scale { get; set; }
-    
-    public double Offset { get; set; }
+    private OscilloscopeViewModel parent;
 
-    public System.Windows.Media.Brush ColorBrush => new SolidColorBrush(
-    System.Windows.Media.Color.FromArgb(Color.A, Color.R, Color.G, Color.B));
+    public Brush ColorBrush => new SolidColorBrush(
+    (ColorConverter.ConvertFromString(ColorHex) as Color?) ?? Colors.Black);
 
-    public ChannelConfigViewModel(int index, string defaultColor)
+    public ChannelConfigViewModel(int index, string defaultColor, OscilloscopeViewModel parentViewModel)
     {
         ChannelIndex = index;
         colorHex = defaultColor;
-        offset = 0;
-        scale = 1;
+        parent = parentViewModel;
     }
+
     [RelayCommand]
     public void PickColor()
     {
         var dlg = new ColorDialog();
-        dlg.Color = System.Drawing.Color.FromArgb(Color.A, Color.R, Color.G, Color.B);
+
+        // Chuyển từ HEX sang System.Drawing.Color để gán ban đầu
+        var currentColor = System.Drawing.ColorTranslator.FromHtml(ColorHex);
+        dlg.Color = currentColor;
 
         if (dlg.ShowDialog() == DialogResult.OK)
         {
-            Color = new ScottPlot.Color(dlg.Color.R, dlg.Color.G, dlg.Color.B);
-            OnPropertyChanged(nameof(ColorBrush));
+            var selected = dlg.Color;
+
+            // Cập nhật lại ColorHex để UI và logic đồng bộ
+            ColorHex = $"#{selected.R:X2}{selected.G:X2}{selected.B:X2}";
         }
+    }
+
+    public event Action<int>? ScaleChanged;
+    partial void OnScaleChanged(double value)
+    {
+        parent?.UpdateScale(ChannelIndex, value);
+        ScaleChanged?.Invoke(ChannelIndex);
+    }
+
+    partial void OnOffsetChanged(double value)
+    {
+        parent?.UpdateOffset(ChannelIndex, value);
+    }
+
+    partial void OnColorHexChanged(string value)
+    {
+        var color = ScottPlot.Color.FromHex(value);
+        parent?.RaiseChannelColorChanged(ChannelIndex, color);
+        OnPropertyChanged(nameof(ColorBrush));
     }
 }

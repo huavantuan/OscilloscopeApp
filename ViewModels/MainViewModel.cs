@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Runtime.InteropServices;
 using System.Timers;
+using OscilloscopeApp.OscilloscopeViewModels;
 
 namespace OscilloscopeApp.ViewModels;
 

@@ -25,6 +25,18 @@ public partial class MainWindow : Window
         {
             Dispatcher.Invoke(RenderPlot);
         };
+
+        _vm.Osc.ChannelColorChanged += (ch, color) =>
+        {
+            _streamers[ch].Color = color;
+        };
+        
+        _vm.Osc.RequestRender += () =>
+        {
+            long offset = _vm.Scroll.CurrentOffset;
+            _vm.Osc.ReadWindow(offset);
+            RenderPlot();
+        };
     }
 
     private void InitPlot()
@@ -38,7 +50,7 @@ public partial class MainWindow : Window
             _streamers[i].LegendText = $"Kênh {i + 1}";
             _streamers[i].ManageAxisLimits = false;
             _streamers[i].LineWidth = 1;
-            _streamers[i].Color = _vm.Osc.ChannelColors[i];
+            _streamers[i].Color = ScottPlot.Color.FromHex(_vm.Osc.ChannelConfigs[i].ColorHex);
         }
 
         // Plot.Plot.LegendShowItemsFromHiddenPlottables();
@@ -48,14 +60,6 @@ public partial class MainWindow : Window
 
     private void RenderPlot()
     {
-        for (int i = 0; i < 8; i++)
-        {
-            _streamers[i].Clear();
-            foreach (var value in _vm.Osc.DisplayData[i])
-                _streamers[i].Add(value);
-            
-        }
-        
         // for (int ch = 0; ch < 8; ch++)
         // {
         //     var cfg = _vm.Osc.ChannelConfigs[ch];
@@ -64,7 +68,13 @@ public partial class MainWindow : Window
         //     _streamers[ch].Color = cfg.Color;
         // }
         // long offset = _vm.Scroll.CurrentOffset;
-
+        
+        for (int i = 0; i < 8; i++)
+        {
+            _streamers[i].Clear();
+            foreach (var value in _vm.Osc.DisplayData[i])
+                _streamers[i].Add(value);
+        }
         long offset = Math.Max(0, _vm.Osc.MaxOffset - 20000);
         Plot.Plot.Axes.SetLimitsX(0, 20000);
         Plot.Refresh();

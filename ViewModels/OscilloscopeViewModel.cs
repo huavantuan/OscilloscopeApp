@@ -1,6 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using OscilloscopeApp.ViewModels;
+
+namespace OscilloscopeApp.OscilloscopeViewModels;
 
 public partial class OscilloscopeViewModel : ObservableObject
 {
@@ -12,10 +15,11 @@ public partial class OscilloscopeViewModel : ObservableObject
 
     public double[] ScaleFactors { get; } = Enumerable.Repeat(1.0, Channels).ToArray();
     public double[] Offsets { get; } = Enumerable.Repeat(0.0, Channels).ToArray();
-
     public ObservableCollection<ChannelConfigViewModel> ChannelConfigs { get; }
 
-
+    public event Action<int, ScottPlot.Color>? ChannelColorChanged;
+    public event Action? RequestRender;
+    
     public OscilloscopeViewModel()
     {
         for (int i = 0; i < Channels; i++)
@@ -33,9 +37,16 @@ public partial class OscilloscopeViewModel : ObservableObject
 
         for (int i = 0; i < 8; i++)
         {
-            ChannelConfigs.Add(new ChannelConfigViewModel(i, defaultColors[i]));
-            Debug.WriteLine($"ChannelConfigs count: {ChannelConfigs.Count}");
+            ChannelConfigs.Add(new ChannelConfigViewModel(i, defaultColors[i], this));
+
+            ChannelConfigs[i].ScaleChanged += (i) =>
+            {
+                ScaleFactors[i] = ChannelConfigs[i].Scale;
+                RequestRender?.Invoke(); // gọi render lại
+            };
         }
+
+
     }
 
     public void AppendFrame(short[][] framePerChannel)
@@ -60,4 +71,18 @@ public partial class OscilloscopeViewModel : ObservableObject
 
     public long MaxOffset => buffers.Max(b => b.Count);
     public long Length => WindowSize;
+
+    public void UpdateScale(int channel, double value)
+    {
+        ScaleFactors[channel] = value;
+    }
+
+    public void UpdateOffset(int channel, double value)
+    {
+        Offsets[channel] = value;
+    }
+    public void RaiseChannelColorChanged(int channelIndex, ScottPlot.Color color)
+    {
+        ChannelColorChanged?.Invoke(channelIndex, color);
+    }
 }
