@@ -18,15 +18,23 @@ public partial class MainViewModel : ObservableObject
 
     public event Action? OnRequestRender;
 
+    private CancellationTokenSource? simulateToken;
+    private Task? simulateTask;
+    private Task? renderTask;
+
+    public bool IsSimulating { get; private set; }
+
+    public string SimulateButtonText => IsSimulating ? "Stop" : "Simulate";
+
     public MainViewModel(ISerialPortService serial)
     {
         this.serial = serial;
         Serial = new SerialViewModel(serial);
-        
+
         serial.DataReceived += (s, bytes) =>
         {
             var span = MemoryMarshal.Cast<byte, short>(bytes.AsSpan());
-            Osc.AppendFrame(span);
+            //Osc.AppendFrame(span);
             pendingUpdate = true;
         };
 
@@ -51,19 +59,51 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     public void Simulate()
     {
-        const int pointCount = 20000;
-        const double phaseStep = Math.PI / 9; // 20 độ ≈ 0.349 rad
-        const double freq = 2 * Math.PI / 1000.0;
-
-        for (int ch = 0; ch < 8; ch++)
+        if (IsSimulating)
         {
-            double phase = ch * phaseStep;
-            for (int i = 0; i < pointCount; i++)
-            {
-                Osc.DisplayData[ch][i] = Math.Sin(i * freq + phase) * 30000; // scale về Int16
-            }
+            simulateToken?.Cancel();
+            IsSimulating = false;
+            return;
         }
-        Console.WriteLine("Simulate called");
-        OnRequestRender?.Invoke();
+
+        simulateToken = new CancellationTokenSource();
+        var token = simulateToken.Token;
+        IsSimulating = true;
+
+        simulateTask = Task.Run(() => RunSimulation(token));
+        renderTask = Task.Run(() => RunRenderLoop(token));
+    }
+    private void RunSimulation(CancellationToken token)
+    {
+        const int batchSize = 1000;
+        int total = 0;
+
+        while (!token.IsCancellationRequested)
+        {
+            var frame = new short[8][];
+            for (int ch = 0; ch < 8; ch++)
+            {
+                frame[ch] = new short[batchSize];
+                double phase = ch * Math.PI / 9;
+                for (int i = 0; i < batchSize; i++)
+                    frame[ch][i] = (short)(Math.Sin((total + i) * 0.01 + phase) * 30000);
+            }
+
+            Osc.AppendFrame(frame);
+            Scroll.CurrentOffset = Osc.MaxOffset - Osc.Length;
+            total += batchSize;
+
+            Thread.Sleep(10); // không dùng await ở đây
+        }
+    }
+    private void RunRenderLoop(CancellationToken token)
+    {
+        while (!token.IsCancellationRequested)
+        {
+            Osc.ReadWindow(Scroll.CurrentOffset);
+            OnRequestRender?.Invoke();
+
+            Thread.Sleep(33); // ~30 FPS
+        }
     }
 }

@@ -54,9 +54,10 @@ public partial class MainWindow : Window
             foreach (var value in _vm.Osc.DisplayData[i])
                 _streamers[i].Add(value);
         }
-        Console.WriteLine("RenderPlot called");
-        long offset = _vm.Scroll.CurrentOffset;
-        Plot.Plot.Axes.SetLimitsX(offset, offset + 20000);
+
+        // long offset = _vm.Scroll.CurrentOffset;
+        long offset = Math.Max(0, _vm.Osc.MaxOffset - 20000);
+        Plot.Plot.Axes.SetLimitsX(0, 20000);
         Plot.Refresh();
     }
    
