@@ -18,6 +18,27 @@
                     Command="{Binding SimulateCommand}" 
                     Margin="8,0,0,0"/>
         </StackPanel>
+        <DataGrid ItemsSource="{Binding Osc.ChannelConfigs}" AutoGenerateColumns="False"
+                HeadersVisibility="Column" CanUserAddRows="False" Margin="10">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Kênh" Binding="{Binding ChannelIndex}" IsReadOnly="True" />
+                <!-- Color Picker -->
+                <DataGridTemplateColumn Header="Màu">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Background="{Binding ColorBrush}" Content="Chọn màu"
+                                    Command="{Binding PickColorCommand}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Offset -->
+                <DataGridTextColumn Header="Offset" Binding="{Binding Offset, Mode=TwoWay}" />
+
+                <!-- Scale -->
+                <DataGridTextColumn Header="Scale" Binding="{Binding Scale, Mode=TwoWay}" />
+            </DataGrid.Columns>
+        </DataGrid>
         <ScottPlot:WpfPlot x:Name="Plot" />
     </DockPanel>
 </Window>

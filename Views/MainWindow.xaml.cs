@@ -38,7 +38,7 @@ public partial class MainWindow : Window
             _streamers[i].LegendText = $"Kênh {i + 1}";
             _streamers[i].ManageAxisLimits = false;
             _streamers[i].LineWidth = 1;
-            _streamers[i].Color = ScottPlot.Color.FromHex("#c5047bff");
+            _streamers[i].Color = _vm.Osc.ChannelColors[i];
         }
 
         // Plot.Plot.LegendShowItemsFromHiddenPlottables();
@@ -53,9 +53,18 @@ public partial class MainWindow : Window
             _streamers[i].Clear();
             foreach (var value in _vm.Osc.DisplayData[i])
                 _streamers[i].Add(value);
+            
         }
-
+        
+        // for (int ch = 0; ch < 8; ch++)
+        // {
+        //     var cfg = _vm.Osc.ChannelConfigs[ch];
+        //     _vm.Osc.ScaleFactors[ch] = cfg.Scale;
+        //     _vm.Osc.Offsets[ch] = cfg.Offset;
+        //     _streamers[ch].Color = cfg.Color;
+        // }
         // long offset = _vm.Scroll.CurrentOffset;
+
         long offset = Math.Max(0, _vm.Osc.MaxOffset - 20000);
         Plot.Plot.Axes.SetLimitsX(0, 20000);
         Plot.Refresh();

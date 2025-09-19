@@ -1,4 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 
 public partial class OscilloscopeViewModel : ObservableObject
 {
@@ -11,6 +13,7 @@ public partial class OscilloscopeViewModel : ObservableObject
     public double[] ScaleFactors { get; } = Enumerable.Repeat(1.0, Channels).ToArray();
     public double[] Offsets { get; } = Enumerable.Repeat(0.0, Channels).ToArray();
 
+    public ObservableCollection<ChannelConfigViewModel> ChannelConfigs { get; }
 
 
     public OscilloscopeViewModel()
@@ -20,6 +23,18 @@ public partial class OscilloscopeViewModel : ObservableObject
             buffers[i] = new RingBuffer(10_000_000);
             DisplayData[i] = new double[WindowSize];
             tempShort[i] = new short[WindowSize];
+        }
+        ChannelConfigs = new ObservableCollection<ChannelConfigViewModel>();
+        string[] defaultColors = new[]
+        {
+            "#c5047bff", "#ff5722", "#4caf50", "#2196f3",
+            "#ffeb3b", "#9c27b0", "#795548", "#e91e63"
+        };
+
+        for (int i = 0; i < 8; i++)
+        {
+            ChannelConfigs.Add(new ChannelConfigViewModel(i, defaultColors[i]));
+            Debug.WriteLine($"ChannelConfigs count: {ChannelConfigs.Count}");
         }
     }
 
