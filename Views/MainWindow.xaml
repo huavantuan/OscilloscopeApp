@@ -39,6 +39,22 @@
                 <DataGridTextColumn Header="Scale" Binding="{Binding Scale, Mode=TwoWay}" />
             </DataGrid.Columns>
         </DataGrid>
-        <ScottPlot:WpfPlot x:Name="Plot" />
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />   <!-- vùng đồ thị -->
+                <RowDefinition Height="Auto"/> <!-- vùng scroll -->
+            </Grid.RowDefinitions>
+
+            <!-- Oscilloscope plot -->
+            <ScottPlot:WpfPlot x:Name="Plot" Grid.Row="0" />
+
+            <!-- Scroll bar -->
+            <ScrollBar  Orientation="Horizontal"
+                        Minimum="0"
+                        Maximum="{Binding Scroll.MaxOffset}"
+                        Value="{Binding Scroll.CurrentOffset, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                        Height="20"
+                        Grid.Row="1"/>
+        </Grid>
     </DockPanel>
 </Window>

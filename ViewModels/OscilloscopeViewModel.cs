@@ -24,7 +24,7 @@ public partial class OscilloscopeViewModel : ObservableObject
     {
         for (int i = 0; i < Channels; i++)
         {
-            buffers[i] = new RingBuffer(10_000_000);
+            buffers[i] = new RingBuffer(100_000_000);
             DisplayData[i] = new double[WindowSize];
             tempShort[i] = new short[WindowSize];
         }

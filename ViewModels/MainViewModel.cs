@@ -64,19 +64,20 @@ public partial class MainViewModel : ObservableObject
         {
             simulateToken?.Cancel();
             IsSimulating = false;
+            Scroll.IsAutoScroll = true;   // cho phép dùng ScrollBar
             return;
         }
 
         simulateToken = new CancellationTokenSource();
         var token = simulateToken.Token;
         IsSimulating = true;
-
+        Scroll.IsAutoScroll = false;  // vô hiệu hóa ScrollBar khi đang chạy
         simulateTask = Task.Run(() => RunSimulation(token));
         renderTask = Task.Run(() => RunRenderLoop(token));
     }
     private void RunSimulation(CancellationToken token)
     {
-        const int batchSize = 1000;
+        const int batchSize = 10000;
         int total = 0;
 
         while (!token.IsCancellationRequested)
@@ -91,19 +92,19 @@ public partial class MainViewModel : ObservableObject
             }
 
             Osc.AppendFrame(frame);
-            Scroll.CurrentOffset = Osc.MaxOffset - Osc.Length;
+            
             total += batchSize;
 
-            Thread.Sleep(10); // không dùng await ở đây
+            Thread.Sleep(1); // không dùng await ở đây
         }
     }
     private void RunRenderLoop(CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {
+            Scroll.CurrentOffset = Osc.MaxOffset - Osc.Length;
             Osc.ReadWindow(Scroll.CurrentOffset);
             OnRequestRender?.Invoke();
-
             Thread.Sleep(33); // ~30 FPS
         }
     }
