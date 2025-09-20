@@ -20,6 +20,8 @@ public partial class OscilloscopeViewModel : ObservableObject
     public event Action<int, ScottPlot.Color>? ChannelColorChanged;
     public event Action? RequestRender;
     
+    private readonly UartReceiver.UartReceiverService uartService;
+
     public OscilloscopeViewModel()
     {
         for (int i = 0; i < Channels; i++)
@@ -46,7 +48,40 @@ public partial class OscilloscopeViewModel : ObservableObject
             };
         }
 
+        uartService = new UartReceiver.UartReceiverService("COM3", 115200);
+        uartService.PacketReceived += OnPacketReceived;
+        uartService.Start();
+    }
 
+    private void OnPacketReceived(object? sender, UartReceiver.Packet e)
+    {
+        // HEADER(0), ADDRESS(1), DATA(2..161), CRC(162..163), EOP(164)
+        if (e.CrcOk && e.Raw.Length == 165)
+        {
+            var data = new byte[160];
+            System.Buffer.BlockCopy(e.Raw, 2, data, 0, 160);
+
+            // Chuyển 160 bytes thành 8 kênh, mỗi kênh 10 mẫu 16-bit (short)
+            // trong đó 16 byte đầu là dữ liệu từ kênh 0 đến kênh 7
+            // mỗi kênh lấy mẫu 10 lần, mỗi lần 2 byte byte high trước byte low sau
+            short[][] framePerChannel = new short[Channels][];
+            for (int ch = 0; ch < Channels; ch++)
+            {
+                framePerChannel[ch] = new short[10];
+                for (int i = 0; i < 10; i++)
+                {
+                    int idx = (ch * 2) + (i * 16);
+                    framePerChannel[ch][i] = BitConverter.ToInt16(data, idx);
+                }
+            }
+
+            AppendFrame(framePerChannel);
+            RequestRender?.Invoke();
+        }
+        else
+        {
+            // Có thể log lỗi nếu cần
+        }
     }
 
     public void AppendFrame(short[][] framePerChannel)
