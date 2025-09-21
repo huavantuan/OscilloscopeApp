@@ -2,6 +2,7 @@
 using System.Windows;
 using OscilloscopeApp.ViewModels;
 using OscilloscopeApp.Services;
+using System.Windows.Forms; // Thêm using này
 
 namespace OscilloscopeApp.Views;
 
@@ -38,6 +39,23 @@ public partial class MainWindow : Window
             _vm.Osc.ReadWindow(offset);
             RenderPlot();
         };
+
+        // Lắng nghe event RequestColorPicker cho từng ChannelConfigViewModel
+        foreach (var cfg in _vm.Osc.ChannelConfigs)
+        {
+            cfg.RequestColorPicker += OnRequestColorPicker;
+        }
+    }
+
+    private void OnRequestColorPicker(ChannelConfigViewModel cfg)
+    {
+        var dlg = new ColorDialog();
+        dlg.Color = System.Drawing.ColorTranslator.FromHtml(cfg.ColorHex);
+        if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+        {
+            string hex = $"#{dlg.Color.R:X2}{dlg.Color.G:X2}{dlg.Color.B:X2}";
+            cfg.SetColorHex(hex);
+        }
     }
 
     private void InitPlot()

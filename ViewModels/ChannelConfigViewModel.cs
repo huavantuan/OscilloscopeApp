@@ -2,6 +2,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.Input;
 using OscilloscopeApp.OscilloscopeViewModels;
+using MediaColor = System.Windows.Media.Color;
+using MediaColorConverter = System.Windows.Media.ColorConverter;
 
 namespace OscilloscopeApp.ViewModels;
 
@@ -22,8 +24,8 @@ public partial class ChannelConfigViewModel : ObservableObject
 
     private OscilloscopeViewModel parent;
 
-    public Brush ColorBrush => new SolidColorBrush(
-        (ColorConverter.ConvertFromString(ColorHex) as Color?) ?? Colors.Black);
+    public System.Windows.Media.Brush ColorBrush => new SolidColorBrush(
+        (MediaColorConverter.ConvertFromString(ColorHex) as MediaColor?) ?? MediaColor.FromRgb(0, 0, 0));
 
     public ChannelConfigViewModel(int index, string defaultColor, OscilloscopeViewModel parentViewModel)
     {
