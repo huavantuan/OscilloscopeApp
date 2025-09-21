@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
+using OscilloscopeApp.Services;
 
 public partial class SerialViewModel : ObservableObject
 {
@@ -16,33 +17,17 @@ public partial class SerialViewModel : ObservableObject
 
     public SerialViewModel(ISerialPortService serial)
     {
-        this.serial = serial;
+        this.serial = serial ?? throw new ArgumentNullException(nameof(serial));
         foreach (var port in serial.GetPortNames())
             AvailablePorts.Add(port);
 
         OnPropertyChanged(nameof(ConnectButtonText));
         OnPropertyChanged(nameof(ConnectButtonColor));
     }
-
-    //[RelayCommand]
-    // private void ToggleConnection()
-    // {
-    //     if (!serial.IsOpen)
-    //         serial.Open(SelectedPort, int.TryParse(BaudRate, out var br) ? br : 115200);
-    //     else
-    //         serial.Close();
-
-    //     OnPropertyChanged(nameof(ConnectButtonText));
-    // }
-    [RelayCommand]
-    private void ConnectButton()
+    
+    public void ToggleConnectionState()
     {
         isConnected = !isConnected;
-
-        // TODO: Gọi mở hoặc đóng cổng thật nếu cần
-
-        // Cập nhật giao diện
-        Console.WriteLine("ConnectButton called");
         OnPropertyChanged(nameof(ConnectButtonText));
         OnPropertyChanged(nameof(ConnectButtonColor));
     }

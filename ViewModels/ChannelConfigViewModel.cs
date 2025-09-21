@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Windows.Media;
 using CommunityToolkit.Mvvm.Input;
-using System.Windows.Forms;
 using OscilloscopeApp.OscilloscopeViewModels;
 
 namespace OscilloscopeApp.ViewModels;
@@ -24,7 +23,7 @@ public partial class ChannelConfigViewModel : ObservableObject
     private OscilloscopeViewModel parent;
 
     public Brush ColorBrush => new SolidColorBrush(
-    (ColorConverter.ConvertFromString(ColorHex) as Color?) ?? Colors.Black);
+        (ColorConverter.ConvertFromString(ColorHex) as Color?) ?? Colors.Black);
 
     public ChannelConfigViewModel(int index, string defaultColor, OscilloscopeViewModel parentViewModel)
     {
@@ -33,22 +32,20 @@ public partial class ChannelConfigViewModel : ObservableObject
         parent = parentViewModel;
     }
 
+    // MVVM-friendly: raise event để View mở ColorPicker
+    public event Action<ChannelConfigViewModel>? RequestColorPicker;
+
     [RelayCommand]
     public void PickColor()
     {
-        var dlg = new ColorDialog();
+        // Raise event để View xử lý mở ColorPicker
+        RequestColorPicker?.Invoke(this);
+    }
 
-        // Chuyển từ HEX sang System.Drawing.Color để gán ban đầu
-        var currentColor = System.Drawing.ColorTranslator.FromHtml(ColorHex);
-        dlg.Color = currentColor;
-
-        if (dlg.ShowDialog() == DialogResult.OK)
-        {
-            var selected = dlg.Color;
-
-            // Cập nhật lại ColorHex để UI và logic đồng bộ
-            ColorHex = $"#{selected.R:X2}{selected.G:X2}{selected.B:X2}";
-        }
+    // View gọi hàm này sau khi chọn màu
+    public void SetColorHex(string hex)
+    {
+        ColorHex = hex;
     }
 
     public event Action<int>? ScaleChanged;
@@ -70,3 +67,4 @@ public partial class ChannelConfigViewModel : ObservableObject
         OnPropertyChanged(nameof(ColorBrush));
     }
 }
+

@@ -1,20 +1,18 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Collections.ObjectModel;
-using System.Runtime.InteropServices;
-using System.Timers;
 using OscilloscopeApp.OscilloscopeViewModels;
-
-namespace OscilloscopeApp.ViewModels;
+using System.Collections.ObjectModel;
+using OscilloscopeApp.Services;
 
 public partial class MainViewModel : ObservableObject
 {
     public SerialViewModel Serial { get; }
     public OscilloscopeViewModel Osc { get; } = new();
     public ScrollViewModel Scroll { get; } = new();
+    private UartReceiverService? uartService;
 
-    private readonly ISerialPortService serial;
     private readonly System.Timers.Timer renderTimer = new(33);
+
     private volatile bool pendingUpdate;
 
     public event Action? OnRequestRender;
@@ -26,18 +24,10 @@ public partial class MainViewModel : ObservableObject
     public bool IsSimulating { get; private set; }
 
     public string SimulateButtonText => IsSimulating ? "Stop" : "Simulate";
+    private CancellationTokenSource? renderTokenSource;
 
-    public MainViewModel(ISerialPortService serial)
+    public MainViewModel(ISerialPortService serialPortService)
     {
-        this.serial = serial;
-        Serial = new SerialViewModel(serial);
-
-        serial.DataReceived += (s, bytes) =>
-        {
-            var span = MemoryMarshal.Cast<byte, short>(bytes.AsSpan());
-            //Osc.AppendFrame(span);
-            pendingUpdate = true;
-        };
 
         Scroll.OffsetChanged += offset =>
         {
@@ -55,49 +45,86 @@ public partial class MainViewModel : ObservableObject
                 OnRequestRender?.Invoke();
             }
         };
+
+        Serial = new SerialViewModel(serialPortService);
+        Osc = new OscilloscopeViewModel();
+
+        // Scan cổng khi khởi động
+        Serial.AvailablePorts.Clear();
+
+        foreach (var port in serialPortService.GetPortNames())
+            Serial.AvailablePorts.Add(port);
         renderTimer.Start();
     }
+
     [RelayCommand]
-    public void Simulate()
+    private void ConnectButton()
     {
-        if (IsSimulating)
+        if (uartService == null || !uartServiceIsOpen)
         {
-            simulateToken?.Cancel();
-            IsSimulating = false;
+            //     simulateToken?.Cancel();
+            //     IsSimulating = false;
+            //     
+            //     return;
+            // }
+            renderTokenSource?.Cancel();
+            renderTokenSource = new CancellationTokenSource();
+
+            var token = renderTokenSource.Token;
+            renderTask = Task.Run(() => RunRenderLoop(token), token);
+            // Khởi tạo và mở cổng
+            uartService = new UartReceiverService(
+                Serial.SelectedPort,
+                int.TryParse(Serial.BaudRate, out var br) ? br : 115200
+            );
+            uartService.PacketReceived += OnPacketReceived;
+            uartService.Start();
+            uartServiceIsOpen = true;
+            Scroll.IsAutoScroll = false;
+        }
+        else
+        {
+            uartService.Stop();
+            uartService.PacketReceived -= OnPacketReceived;
+            uartService.Dispose();
+            uartService = null;
+            uartServiceIsOpen = false;
             Scroll.IsAutoScroll = true;   // cho phép dùng ScrollBar
-            return;
         }
 
-        simulateToken = new CancellationTokenSource();
-        var token = simulateToken.Token;
-        IsSimulating = true;
-        Scroll.IsAutoScroll = false;  // vô hiệu hóa ScrollBar khi đang chạy
-        simulateTask = Task.Run(() => RunSimulation(token));
-        renderTask = Task.Run(() => RunRenderLoop(token));
+        Serial.ToggleConnectionState();
+        
     }
-    private void RunSimulation(CancellationToken token)
-    {
-        const int batchSize = 10000;
-        int total = 0;
 
-        while (!token.IsCancellationRequested)
+    private bool uartServiceIsOpen = false;
+
+    private void OnPacketReceived(object? sender, Packet e)
+    {
+        if (e.CrcOk && e.Raw.Length == 165)
         {
-            var frame = new short[8][];
+            var data = new byte[160];
+            System.Buffer.BlockCopy(e.Raw, 2, data, 0, 160);
+
+            // Chuyển 160 bytes thành 8 kênh, mỗi kênh 10 mẫu 16-bit (short)
+            short[][] framePerChannel = new short[8][];
             for (int ch = 0; ch < 8; ch++)
             {
-                frame[ch] = new short[batchSize];
-                double phase = ch * Math.PI / 9;
-                for (int i = 0; i < batchSize; i++)
-                    frame[ch][i] = (short)(Math.Sin((total + i) * 0.01 + phase) * 30000);
+                framePerChannel[ch] = new short[10];
+                for (int i = 0; i < 10; i++)
+                {
+                    int idx = (ch * 2) + (i * 16);
+                    framePerChannel[ch][i] = BitConverter.ToInt16(data, idx);
+                }
             }
 
-            Osc.AppendFrame(frame);
-            
-            total += batchSize;
-
-            Thread.Sleep(1); // không dùng await ở đây
+            Osc.AppendFrame(framePerChannel);
+        }
+        else
+        {
+            // TODO: log lỗi nếu cần
         }
     }
+
     private void RunRenderLoop(CancellationToken token)
     {
         while (!token.IsCancellationRequested)

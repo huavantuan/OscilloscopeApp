@@ -1,6 +1,7 @@
 ﻿using ScottPlot.Plottables;
 using System.Windows;
 using OscilloscopeApp.ViewModels;
+using OscilloscopeApp.Services;
 
 namespace OscilloscopeApp.Views;
 
@@ -14,7 +15,7 @@ public partial class MainWindow : Window
         InitializeComponent();
 
         // Khởi tạo ViewModel và gán DataContext
-        _vm = new MainViewModel(new MockSerialPortService());
+        _vm = new MainViewModel(new SerialPortService());
         DataContext = _vm;
 
         // Khởi tạo đồ thị ScottPlot

@@ -7,8 +7,43 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 
-namespace UartReceiver
+namespace OscilloscopeApp.Services
 {
+    public interface ISerialPortService
+    {
+        IEnumerable<string> GetPortNames();
+        bool IsOpen { get; }
+        void Open(string portName, int baudRate);
+        void Close();
+    }
+
+    public class SerialPortService : ISerialPortService
+    {
+        private SerialPort? _port;
+
+        public IEnumerable<string> GetPortNames()
+        {
+            return SerialPort.GetPortNames();
+        }
+
+        public bool IsOpen => _port != null && _port.IsOpen;
+
+        public void Open(string portName, int baudRate)
+        {
+            if (_port != null && _port.IsOpen)
+                _port.Close();
+
+            _port = new SerialPort(portName, baudRate, Parity.None, 8, StopBits.One);
+            _port.Open();
+        }
+
+        public void Close()
+        {
+            if (_port != null && _port.IsOpen)
+                _port.Close();
+        }
+    }
+
     public sealed class UartOptions
     {
         public byte Header { get; set; } = 0x55;
