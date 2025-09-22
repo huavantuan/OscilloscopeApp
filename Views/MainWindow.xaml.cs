@@ -78,15 +78,7 @@ public partial class MainWindow : Window
 
     private void RenderPlot()
     {
-        // for (int ch = 0; ch < 8; ch++)
-        // {
-        //     var cfg = _vm.Osc.ChannelConfigs[ch];
-        //     _vm.Osc.ScaleFactors[ch] = cfg.Scale;
-        //     _vm.Osc.Offsets[ch] = cfg.Offset;
-        //     _streamers[ch].Color = cfg.Color;
-        // }
-        // long offset = _vm.Scroll.CurrentOffset;
-        
+
         for (int i = 0; i < 8; i++)
         {
             _streamers[i].Clear();

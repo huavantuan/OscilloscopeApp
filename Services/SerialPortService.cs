@@ -286,6 +286,7 @@ namespace OscilloscopeApp.Services
                     var pkt = new Packet(raw, crcOk, seq);
 
                     PacketReceived?.Invoke(this, pkt);
+                    // Thread.Sleep(1); // Giảm thiểu starvation
                 }
             }
         }

@@ -10,12 +10,12 @@
             <ComboBox Width="120" Margin="0,0,8,0" ItemsSource="{Binding Serial.AvailablePorts}" SelectedItem="{Binding Serial.SelectedPort}" />
             <TextBox Width="100" Margin="0,0,8,0" Text="{Binding Serial.BaudRate}" />
             <Button Width="110"
-                    Content="{Binding ConnectButtonText}"
-                    Background="{Binding ConnectButtonColor}"
-                    Command="{Binding ConnectButtonCommand}" />
+                    Content="{Binding Button.ConnectButtonText}"
+                    Background="{Binding Button.ConnectButtonColor}"
+                    Command="{Binding Button.ConnectButtonCommand}" />
             <Button Width="120" 
                     Content="Vẽ mô phỏng" 
-                    Command="{Binding SimulateCommand}" 
+                    Command="{Binding Button.SimulateCommand}" 
                     Margin="8,0,0,0"/>
         </StackPanel>
         <DataGrid ItemsSource="{Binding Osc.ChannelConfigs}" AutoGenerateColumns="False"
