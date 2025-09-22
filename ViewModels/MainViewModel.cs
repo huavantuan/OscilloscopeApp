@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using OscilloscopeApp.OscilloscopeViewModels;
 using System.Collections.ObjectModel;
 using OscilloscopeApp.Services;
+using System.Security.RightsManagement;
 
 public partial class MainViewModel : ObservableObject
 {
@@ -24,6 +25,11 @@ public partial class MainViewModel : ObservableObject
     public bool IsSimulating { get; private set; }
 
     public string SimulateButtonText => IsSimulating ? "Stop" : "Simulate";
+
+    private bool CommIsConnected = false;
+    public string ConnectButtonText => CommIsConnected ? "Disconnect" : "Connect";
+    public string ConnectButtonColor => CommIsConnected ? "Red" : "Green";
+
     private CancellationTokenSource? renderTokenSource;
 
     public MainViewModel(ISerialPortService serialPortService)
@@ -60,26 +66,28 @@ public partial class MainViewModel : ObservableObject
     [RelayCommand]
     private void ConnectButton()
     {
-        if (uartService == null || !uartServiceIsOpen)
+        Console.WriteLine($"ConnectButton called. CommIsConnected: {CommIsConnected}");
+        if (uartService == null || !CommIsConnected)
         {
-            //     simulateToken?.Cancel();
-            //     IsSimulating = false;
-            //     
-            //     return;
-            // }
             renderTokenSource?.Cancel();
             renderTokenSource = new CancellationTokenSource();
 
             var token = renderTokenSource.Token;
             renderTask = Task.Run(() => RunRenderLoop(token), token);
             // Khởi tạo và mở cổng
+            if (string.IsNullOrEmpty(Serial.SelectedPort) || !Serial.AvailablePorts.Contains(Serial.SelectedPort))
+            {
+                // Có thể hiển thị thông báo lỗi hoặc return
+                Console.WriteLine("Selected port is invalid or not available.");
+                return;
+            }
             uartService = new UartReceiverService(
-                Serial.SelectedPort,
-                int.TryParse(Serial.BaudRate, out var br) ? br : 115200
-            );
+            Serial.SelectedPort,
+            int.TryParse(Serial.BaudRate, out var br) ? br : 9600
+        );
             uartService.PacketReceived += OnPacketReceived;
             uartService.Start();
-            uartServiceIsOpen = true;
+            CommIsConnected = true;
             Scroll.IsAutoScroll = false;
         }
         else
@@ -88,15 +96,15 @@ public partial class MainViewModel : ObservableObject
             uartService.PacketReceived -= OnPacketReceived;
             uartService.Dispose();
             uartService = null;
-            uartServiceIsOpen = false;
+            CommIsConnected = false;
             Scroll.IsAutoScroll = true;   // cho phép dùng ScrollBar
         }
 
         Serial.ToggleConnectionState();
+        OnPropertyChanged(nameof(ConnectButtonText));
+        OnPropertyChanged(nameof(ConnectButtonColor));
         
     }
-
-    private bool uartServiceIsOpen = false;
 
     private void OnPacketReceived(object? sender, Packet e)
     {

@@ -2,7 +2,6 @@
 using System.Windows;
 using OscilloscopeApp.ViewModels;
 using OscilloscopeApp.Services;
-using System.Windows.Forms; // Thêm using này
 
 namespace OscilloscopeApp.Views;
 
