@@ -46,12 +46,13 @@ public partial class MainViewModel : ObservableObject
             if (isConnected)
             {
                 pendingUpdate = true;
+                Scroll.IsAutoScroll = false;  // không cho dùng ScrollBar
                 Serial.StartCollectingData();
             }
             else
             {
                 pendingUpdate = false;
-                
+                Scroll.IsAutoScroll = true;   // cho phép dùng ScrollBar
                 Serial.StopCollectingData();
             }
         };
