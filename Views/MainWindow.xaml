@@ -15,7 +15,7 @@
                     Command="{Binding Button.ConnectButtonCommand}" />
             <Button Width="120" 
                     Content="Vẽ mô phỏng" 
-                    Command="{Binding Button.SimulateCommand}" 
+                    Command="{Binding Simulate.SimulateButtonCommand}" 
                     Margin="8,0,0,0"/>
         </StackPanel>
         <DataGrid ItemsSource="{Binding Osc.ChannelConfigs}" AutoGenerateColumns="False"

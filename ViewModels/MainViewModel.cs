@@ -11,6 +11,9 @@ public partial class MainViewModel : ObservableObject
     public ScrollViewModel Scroll { get; } = new();
     public ButtonViewModel Button { get; } = new();
 
+    public SimulateViewModel Simulate { get; } = new SimulateViewModel(new SimulatedSerialPortService());
+
+
     private readonly System.Timers.Timer renderTimer = new(33);
 
     private volatile bool pendingUpdate;
@@ -64,6 +67,13 @@ public partial class MainViewModel : ObservableObject
             pendingUpdate = true;
         };
         renderTimer.Start();
+
+        Simulate.SimulatedDataReceived += (s, data) =>
+        {
+            // Xử lý dữ liệu giả lập như dữ liệu thật
+            Osc.AppendFrame(data);
+            pendingUpdate = true;
+        };
     }
 
 }
