@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 public partial class ScrollViewModel : ObservableObject
 {
     [ObservableProperty] private long currentOffset;
+    [ObservableProperty] private bool isAutoScroll = true;
     public long MaxOffset { get; private set; }
     public event Action<long>? OffsetChanged;
 
@@ -15,17 +16,8 @@ public partial class ScrollViewModel : ObservableObject
 
     partial void OnCurrentOffsetChanged(long value) => OffsetChanged?.Invoke(value);
 
-    private bool _isAutoScroll = true;
-    public bool IsAutoScroll
+    partial void OnIsAutoScrollChanged(bool value)
     {
-        get => _isAutoScroll;
-        set
-        {
-            if (_isAutoScroll != value)
-            {
-                _isAutoScroll = value;
-                OnPropertyChanged();
-            }
-        }
+        // Nếu cần xử lý khi thay đổi IsAutoScroll, thêm vào đây.
     }
 }
