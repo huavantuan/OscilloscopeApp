@@ -8,8 +8,8 @@ namespace OscilloscopeApp.ViewModels
     public partial class ButtonViewModel : ObservableObject
     {
         [ObservableProperty] private bool isButtonConnected = false;
-        public string ConnectButtonText => IsButtonConnected ? "Disconnect" : "Connect";
-        public string ConnectButtonColor => IsButtonConnected ? "Red" : "Green";
+        public string ConnectButtonText => IsButtonConnected ? "DISCONNECT" : "CONNECT";
+        public string ConnectButtonColor => IsButtonConnected ? "LightCoral" : "LightGreen";
 
         public event EventHandler<bool>? ButtonConnectedChanged;
 

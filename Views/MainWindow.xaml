@@ -6,13 +6,14 @@
     xmlns:ScottPlot="clr-namespace:ScottPlot.WPF;assembly=ScottPlot.WPF"
     Title="Oscilloscope" Height="600" Width="900">
     <DockPanel>
-        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10">
-            <ComboBox Width="120" Margin="0,0,8,0" ItemsSource="{Binding Serial.AvailablePorts}" SelectedItem="{Binding Serial.SelectedPort}" />
-            <TextBox Width="100" Margin="0,0,8,0" Text="{Binding Serial.BaudRate}" />
-            <Button Width="110"
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="10" Height="40">
+            <ComboBox Width="120" Height="20" Margin="0,0,8,0" ItemsSource="{Binding Serial.AvailablePorts}" SelectedItem="{Binding Serial.SelectedPort}" />
+            <TextBox Width="100" Height="20" Margin="0,0,8,0" Text="{Binding Serial.BaudRate}" />
+            <Button Width="80" Height="40"
                     Content="{Binding Button.ConnectButtonText}"
                     Background="{Binding Button.ConnectButtonColor}"
-                    Command="{Binding Button.ConnectButtonCommand}" />
+                    Command="{Binding Button.ConnectButtonCommand}" 
+                    Style="{StaticResource GlowButtonStyle}"/>
             <Button Width="120" 
                     Content="Vẽ mô phỏng" 
                     Command="{Binding Simulate.SimulateButtonCommand}" 
