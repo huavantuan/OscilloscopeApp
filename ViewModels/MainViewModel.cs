@@ -59,7 +59,7 @@ public partial class MainViewModel : ObservableObject
 
         Serial.FrameReceived += (s, frame) =>
         {
-            Console.WriteLine("Frame received. Packets received: " + Serial.PacketReceivedCount + ", Packets errored: " + Serial.PacketErrorCount);
+            // Console.WriteLine("Frame received. Packets received: " + Serial.PacketReceivedCount + ", Packets errored: " + Serial.PacketErrorCount);
             Osc.AppendFrame(frame);
             pendingUpdate = true;
         };

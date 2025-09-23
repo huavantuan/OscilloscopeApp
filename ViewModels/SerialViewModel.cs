@@ -95,7 +95,7 @@ public partial class SerialViewModel : ObservableObject
             for (int i = 0; i < samples; i++)
             {
                 int idx = (ch * 2) + (i * 16);
-                frame[ch][i] = BitConverter.ToInt16(raw, idx);
+                frame[ch][i] = (short)(raw[idx + 1] | (raw[idx] << 8));
             }
         }
 
