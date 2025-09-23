@@ -11,10 +11,11 @@ public partial class MainViewModel : ObservableObject
     public ScrollViewModel Scroll { get; } = new();
     public ButtonViewModel Button { get; } = new();
 
-    private readonly System.Timers.Timer renderTimer = new(33);
+    private readonly System.Timers.Timer renderTimer = new(100);
 
     private volatile bool pendingUpdate;
 
+    // Sự kiện để yêu cầu render lại từ View
     public event Action? OnRequestRender;
 
     public MainViewModel(ISerialPortService serialPortService)

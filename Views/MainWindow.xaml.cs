@@ -78,7 +78,7 @@ public partial class MainWindow : Window
 
     private void RenderPlot()
     {
-
+        
         for (int i = 0; i < 8; i++)
         {
             _streamers[i].Clear();

@@ -200,10 +200,11 @@ namespace OscilloscopeApp.Services
         private readonly UartOptions _opt;
         private readonly PacketFramer _framer;
         private readonly Channel<byte[]> _packetChannel;
-        private readonly CancellationTokenSource _cts = new();
-        private long _sequence;
-        private readonly System.Timers.Timer _timer;
         
+        private long _sequence;
+        private Task? _readTask;
+        private CancellationTokenSource _cts = new();
+
         public event EventHandler<Packet>? PacketReceived;
 
         public UartReceiverService(string portName, int baudRate, UartOptions? options = null)
@@ -224,28 +225,33 @@ namespace OscilloscopeApp.Services
             };
             _port.ReadBufferSize = 16384; // Tăng kích thước buffer đọc
                                           // _port.DataReceived += OnDataReceived;
-            _timer = new System.Timers.Timer(1); // 1ms
-            _timer.Elapsed += (s, e) => OnDataReceived(s, null);
         }
 
         public void Start()
         {
-            if (!_port.IsOpen) _port.Open();
+            if (!_port.IsOpen)
+            {
+                _port.Open();
+                _cts = new CancellationTokenSource();
+                _readTask = Task.Run(() => ReadLoopAsync(_cts.Token));
+            }
 
-            // Spin up workers bằng số lõi CPU
-            // int workers = Math.Max(2, Environment.ProcessorCount);
-            // for (int i = 0; i < workers; i++)
-            // {
-            //     _ = Task.Run(() => WorkerAsync(_cts.Token));
-            // }
-            _timer.Start();
         }
 
         public void Stop()
         {
-            // _cts.Cancel();
-            _timer.Stop();
+            _cts.Cancel();
+            // _readTask?.Wait();
             if (_port.IsOpen) _port.Close();
+        }
+
+        private async Task ReadLoopAsync(CancellationToken ct)
+        {
+            while (!ct.IsCancellationRequested)
+            {
+                OnDataReceived(this, null);
+                await Task.Delay(1, ct); // 1ms chu kỳ
+            }
         }
 
         private void OnDataReceived(object? sender, SerialDataReceivedEventArgs? e)
@@ -282,24 +288,6 @@ namespace OscilloscopeApp.Services
             catch
             {
                 // Có thể log nếu cần
-            }
-        }
-
-        private async Task WorkerAsync(CancellationToken ct)
-        {
-            // Worker: đọc gói đã unescape, verify CRC, raise event về UI
-            while (await _packetChannel.Reader.WaitToReadAsync(ct).ConfigureAwait(false))
-            {
-                while (_packetChannel.Reader.TryRead(out var raw))
-                {
-                    // bool crcOk = VerifyCrc(raw);
-                    // long seq = Interlocked.Increment(ref _sequence);
-
-                    // var pkt = new Packet(raw, crcOk, seq);
-
-                    // PacketReceived?.Invoke(this, pkt);
-                    // Thread.Sleep(1); // Giảm thiểu starvation
-                }
             }
         }
 
