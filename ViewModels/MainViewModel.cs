@@ -23,11 +23,12 @@ public partial class MainViewModel : ObservableObject
         Serial = new SerialViewModel(serialPortService);
         Osc = new OscilloscopeViewModel();
         Button = new ButtonViewModel();
+        Scroll = new ScrollViewModel();
 
         Scroll.OffsetChanged += offset =>
         {
             Osc.ReadWindow(offset);
-            pendingUpdate = true;
+            OnRequestRender?.Invoke();
         };
 
         renderTimer.Elapsed += (s, e) =>
@@ -46,13 +47,13 @@ public partial class MainViewModel : ObservableObject
             if (isConnected)
             {
                 pendingUpdate = true;
-                Scroll.IsAutoScroll = false;  // không cho dùng ScrollBar
                 Serial.StartCollectingData();
             }
             else
             {
                 pendingUpdate = false;
                 Scroll.IsAutoScroll = true;   // cho phép dùng ScrollBar
+                Scroll.SetMax(Scroll.CurrentOffset);
                 Serial.StopCollectingData();
             }
         };
