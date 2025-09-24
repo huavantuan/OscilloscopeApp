@@ -1,9 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using System.Collections.ObjectModel;
-using System.Windows.Media;
 using OscilloscopeApp.Services;
-using System.Security.RightsManagement;
+
 
 namespace OscilloscopeApp.ViewModels;
 
@@ -78,6 +76,7 @@ public partial class SerialViewModel : ObservableObject
         }
         else
         {
+            Console.WriteLine("Frame received with errors. Packets received: " + PacketReceivedCount + ", Packets errored: " + PacketErrorCount);
             PacketErrorCount++;
         }
     }

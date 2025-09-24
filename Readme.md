@@ -23,3 +23,7 @@ git clone https://github.com/huavantuan/OscilloscopeApp.git
 cd OscilloscopeApp
 dotnet build
 dotnet run
+## build release có runtime
+dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true
+## build release không có runtime
+dotnet publish -c Release -r win-x64 --self-contained false

@@ -26,7 +26,7 @@ public partial class ChannelConfigViewModel : ObservableObject
 
     public ChannelConfigViewModel(int index, string defaultColor, OscilloscopeViewModel parentViewModel)
     {
-        ChannelIndex = index + 1;
+        ChannelIndex = index;
         ColorHex = defaultColor;
         parent = parentViewModel;
 

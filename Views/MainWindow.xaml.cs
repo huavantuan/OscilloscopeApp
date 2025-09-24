@@ -65,7 +65,7 @@ public partial class MainWindow : Window
         {
             // Tạo DataStreamer cho mỗi kênh
             _streamers[i] = Plot.Plot.Add.DataStreamer(20000);
-            _streamers[i].LegendText = $"Kênh {i + 1}";
+            _streamers[i].LegendText = $"Kênh {i}";
             _streamers[i].ManageAxisLimits = false;
             _streamers[i].LineWidth = 1;
             _streamers[i].Color = ScottPlot.Color.FromHex(_vm.Osc.ChannelConfigs[i].ColorHex);

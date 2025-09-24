@@ -250,7 +250,7 @@ namespace OscilloscopeApp.Services
             while (!ct.IsCancellationRequested)
             {
                 OnDataReceived(this, null);
-                await Task.Delay(1, ct); // 1ms chu kỳ
+                await Task.Delay(10, ct); // 10ms chu kỳ
             }
         }
 
