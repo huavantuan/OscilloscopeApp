@@ -1,16 +1,16 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System;
-using System.Windows.Media;
 
 namespace OscilloscopeApp.ViewModels
 {
     public partial class ButtonViewModel : ObservableObject
     {
         [ObservableProperty] private bool isButtonConnected = false;
+
         public string ConnectButtonText => IsButtonConnected ? "Disconnect" : "Connect";
         public string ConnectButtonColor => IsButtonConnected ? "Red" : "Green";
-
+        
+        // Event to notify connection state changes to MainViewModel
         public event EventHandler<bool>? ButtonConnectedChanged;
 
         public ButtonViewModel()
@@ -20,10 +20,12 @@ namespace OscilloscopeApp.ViewModels
 
         }
 
+        // This method is called automatically when IsButtonConnected changes
         partial void OnIsButtonConnectedChanged(bool value)
         {
             Console.WriteLine("Button connection state changed.");
             ButtonConnectedChanged?.Invoke(this, value);
+            // Update the button's appearance for binding
             OnPropertyChanged(nameof(ConnectButtonText));
             OnPropertyChanged(nameof(ConnectButtonColor));
         }

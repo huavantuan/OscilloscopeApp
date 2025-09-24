@@ -11,14 +11,11 @@ public partial class ChannelConfigViewModel : ObservableObject
 {
     public int ChannelIndex { get; }
 
-    [ObservableProperty]
-    private string colorHex;
+    [ObservableProperty] private string colorHex;
 
-    [ObservableProperty]
-    private double offset;
+    [ObservableProperty] private double offset;
 
-    [ObservableProperty]
-    private double scale;
+    [ObservableProperty] private double scale;
 
     public ScottPlot.Color Color { get; set; }
 
@@ -30,8 +27,9 @@ public partial class ChannelConfigViewModel : ObservableObject
     public ChannelConfigViewModel(int index, string defaultColor, OscilloscopeViewModel parentViewModel)
     {
         ChannelIndex = index;
-        colorHex = defaultColor;
+        ColorHex = defaultColor;
         parent = parentViewModel;
+
     }
 
     // MVVM-friendly: raise event để View mở ColorPicker
@@ -44,13 +42,14 @@ public partial class ChannelConfigViewModel : ObservableObject
         RequestColorPicker?.Invoke(this);
     }
 
-    // View gọi hàm này sau khi chọn màu
+    // View gọi hàm này sau khi chọn màu xong
     public void SetColorHex(string hex)
     {
         ColorHex = hex;
     }
 
     public event Action<int>? ScaleChanged;
+
     partial void OnScaleChanged(double value)
     {
         parent?.UpdateScale(ChannelIndex, value);

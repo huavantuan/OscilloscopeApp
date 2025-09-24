@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using OscilloscopeApp.ViewModels;
 
 namespace OscilloscopeApp.OscilloscopeViewModels;
@@ -17,7 +16,9 @@ public partial class OscilloscopeViewModel : ObservableObject
     public double[] Offsets { get; } = Enumerable.Repeat(0.0, Channels).ToArray();
     public ObservableCollection<ChannelConfigViewModel> ChannelConfigs { get; }
 
+    // Event to notify when a channel's color has changed
     public event Action<int, ScottPlot.Color>? ChannelColorChanged;
+
     public event Action? RequestRender;
 
     public OscilloscopeViewModel()
@@ -29,13 +30,14 @@ public partial class OscilloscopeViewModel : ObservableObject
             tempShort[i] = new short[WindowSize];
         }
         ChannelConfigs = new ObservableCollection<ChannelConfigViewModel>();
+
         string[] defaultColors = new[]
         {
             "#c5047bff", "#ff5722", "#4caf50", "#2196f3",
             "#ffeb3b", "#9c27b0", "#795548", "#e91e63"
         };
 
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < Channels; i++)
         {
             ChannelConfigs.Add(new ChannelConfigViewModel(i, defaultColors[i], this));
 
