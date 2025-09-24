@@ -8,7 +8,7 @@ namespace OscilloscopeApp.ViewModels
         [ObservableProperty] private bool isButtonConnected = false;
 
         public string ConnectButtonText => IsButtonConnected ? "Disconnect" : "Connect";
-        public string ConnectButtonColor => IsButtonConnected ? "Red" : "Green";
+        public string ConnectButtonColor => IsButtonConnected ? "DarkRed" : "Green";
         
         // Event to notify connection state changes to MainViewModel
         public event EventHandler<bool>? ButtonConnectedChanged;
