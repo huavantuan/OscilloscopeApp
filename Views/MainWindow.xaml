@@ -20,24 +20,32 @@
                     Margin="8,0,0,0"/>
         </StackPanel>
         <DataGrid ItemsSource="{Binding Osc.ChannelConfigs}" AutoGenerateColumns="False"
-                HeadersVisibility="Column" CanUserAddRows="False" Margin="10">
+                HeadersVisibility="Column" CanUserAddRows="False" Margin="10" >
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Kênh" Binding="{Binding ChannelIndex}" IsReadOnly="True" />
+                <DataGridTextColumn Header="Kênh" 
+                                    Binding="{Binding ChannelIndex}" 
+                                    IsReadOnly="True" 
+                                    ElementStyle="{StaticResource CenterTextBlockStyle}"/>
                 <!-- Color Picker -->
                 <DataGridTemplateColumn Header="Màu">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Button Background="{Binding ColorBrush}" Content=""
+                            <Button Background="{Binding ColorBrush}" 
+                                    Content=""
                                     Command="{Binding PickColorCommand}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
 
                 <!-- Offset -->
-                <DataGridTextColumn Header="Offset" Binding="{Binding Offset, Mode=TwoWay}" />
+                <DataGridTextColumn Header="Offset" 
+                                    Binding="{Binding Offset, Mode=TwoWay}" 
+                                    ElementStyle="{StaticResource CenterTextBlockStyle}"/>
 
                 <!-- Scale -->
-                <DataGridTextColumn Header="Scale" Binding="{Binding Scale, Mode=TwoWay}" />
+                <DataGridTextColumn Header="Scale" 
+                                    Binding="{Binding Scale, Mode=TwoWay}" 
+                                    ElementStyle="{StaticResource CenterTextBlockStyle}"/>
             </DataGrid.Columns>
         </DataGrid>
         <Grid>
