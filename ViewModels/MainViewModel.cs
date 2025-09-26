@@ -1,3 +1,4 @@
+using System.Security.RightsManagement;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OscilloscopeApp.OscilloscopeViewModels;
 using OscilloscopeApp.Services;
@@ -10,6 +11,7 @@ public partial class MainViewModel : ObservableObject
     public OscilloscopeViewModel Osc { get; } = new();
     public ScrollViewModel Scroll { get; } = new();
     public ButtonViewModel Button { get; } = new();
+    
 
     private readonly System.Timers.Timer renderTimer = new(100);
 
